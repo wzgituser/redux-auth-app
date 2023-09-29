@@ -1,17 +1,41 @@
-
 const asyncHandler = require("express-async-handler");
 
+//@desc     Auth user account
+//route     Get /api/user/profile
+//@access   Public
+
 const auth = asyncHandler(async (req, res) => {
-  res.status(401);
-  throw new Error("Something went wrong");
   res.status(200).json({ m: "hopefully it works" });
 });
-const post = asyncHandler(async (req, res) => {
+//@desc     Auth user account
+//route     Get /api/user/profile
+//@access   Public
+
+const registerUser = asyncHandler(async (req, res) => {
+  res.status(200).json({ m: "register" });
+});
+//@desc     Logout from the user account
+//route     Post /api/user/logout
+//@acces    Private
+const logoutUser = asyncHandler(async (req, res) => {
+  res.status(200).json({ m: "logout" });
+});
+
+//@desc     Creacte user profile
+//route     Post /api/user/create
+//@access   Private
+const create = asyncHandler(async (req, res) => {
   res.status(200).json({ m: "post function " });
 });
-const put = async (req, res) => {
+//@desc     Update user profile
+//route     Put /api/user/update
+//@access   Private
+const update = async (req, res) => {
   res.status(200).json({ m: "this is put method" });
 };
+//@desc     Delete user profile
+//route     Delete  /api/user/delete/:id
+//@access   Private
 const del = async (req, res) => {
   try {
     res.status(200).json({ m: "this is delete method" });
@@ -19,4 +43,4 @@ const del = async (req, res) => {
     console.log(error);
   }
 };
-module.exports = { auth, post, put, del };
+module.exports = { auth, registerUser, create, logoutUser, update, del };
