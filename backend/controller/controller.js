@@ -24,8 +24,8 @@ const auth = asyncHandler(async (req, res) => {
     throw new Error("invalid email or password!!!");
   }
 });
-//@desc     Auth user account
-//route     Get /api/user/profile
+//@desc     Register user account
+//route     post /api/user/profile
 //@access   Public
 
 const registerUser = asyncHandler(async (req, res) => {
@@ -63,8 +63,14 @@ const registerUser = asyncHandler(async (req, res) => {
 //@desc     Logout from the user account
 //route     Post /api/user/logout
 //@acces    Private
+
 const logoutUser = asyncHandler(async (req, res) => {
-  res.status(200).json({ m: "logout" });
+  // the process logging out is done,by expire the cooki
+  res.cookie("jwt", "", {
+    httpOnly: true,
+    expires: new Date(0)
+  });
+  res.status(200).json({ msg: "User logged out." });
 });
 
 //@desc     Creacte user profile
