@@ -8,11 +8,11 @@ const tokenGenerete = require("../util/jwtToken");
 
 const auth = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
-
+  // finding the vlue inside "User" model
   const user = await User.findOne({ email });
 
   if (user && (await user.machPassword(password))) {
-    // generate token with use of the "tokenGenerate" script
+    // generate's token with use of the "tokenGenerate" bcrypt methode
     await tokenGenerete(res, user._id);
     res.status(201).json({
       _id: user._id,
@@ -53,7 +53,7 @@ const registerUser = asyncHandler(async (req, res) => {
       _id: user._id,
       name: user.name,
       email: user.email,
-      cookie: tok === true ? true : false
+      cookie: !tok ? false : true
     });
   } else {
     res.status(400);
@@ -85,14 +85,70 @@ const create = asyncHandler(async (req, res) => {
 const update = async (req, res) => {
   res.status(200).json({ m: "this is put method" });
 };
+//@desc     getAll user profile
+//route     Get /api/user/update
+//@access   Private
+const getAll = asyncHandler(async (req, res) => {
+  const getUsers = await User.find();
+  if (getUsers) {
+    res.status(200).json({ getUsers });
+  } else {
+    res.status(404);
+    new Error("error not foound code 404");
+  }
+});
 //@desc     Delete user profile
 //route     Delete  /api/user/delete/:id
 //@access   Private
-const del = async (req, res) => {
-  try {
-    res.status(200).json({ m: "this is delete method" });
-  } catch (error) {
-    console.log(error);
+const del = asyncHandler(async (req, res) => {
+  const { name, email } = req.body;
+  const findUser = await User.findOne({ name, email });
+  console.log(findUser);
+  if (findUser) {
+    const delUser = await findUser.deleteOne();
+    if (delUser) {
+      res.status(201).json({
+        msg: `user with name: ${name} and email: ${email} was deleted`
+      });
+    }
+  } else {
+    res.status(404);
+    throw new Error("user not deleted err 404");
   }
+});
+// @desc    Update user profile
+// @route   PUT /api/users/profile
+// @access  Private
+const updateUserProfile = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id);
+
+  if (user) {
+    user.name = req.body.name || user.name;
+    user.email = req.body.email || user.email;
+
+    if (req.body.password) {
+      user.password = req.body.password;
+    }
+
+    const updatedUser = await user.save();
+
+    res.json({
+      _id: updatedUser._id,
+      name: updatedUser.name,
+      email: updatedUser.email
+    });
+  } else {
+    res.status(404);
+    throw new Error("User not found");
+  }
+});
+module.exports = {
+  auth,
+  registerUser,
+  create,
+  logoutUser,
+  update,
+  del,
+  getAll,
+  updateUserProfile
 };
-module.exports = { auth, registerUser, create, logoutUser, update, del };
