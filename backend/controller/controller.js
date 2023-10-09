@@ -2,6 +2,7 @@ const asyncHandler = require("express-async-handler");
 const { User } = require("../model/modejDb");
 const { json } = require("express");
 const tokenGenerete = require("../util/jwtToken");
+const jwt = require("jsonwebtoken");
 //@desc     Auth user account
 //route     Get /api/user/profile
 //@access   Public
@@ -52,8 +53,7 @@ const registerUser = asyncHandler(async (req, res) => {
     res.status(201).json({
       _id: user._id,
       name: user.name,
-      email: user.email,
-      cookie: !tok ? false : true
+      email: user.email
     });
   } else {
     res.status(400);
@@ -91,7 +91,12 @@ const update = async (req, res) => {
 const getAll = asyncHandler(async (req, res) => {
   const getUsers = await User.find();
   if (getUsers) {
-    res.status(200).json({ getUsers });
+    try {
+      res.status(200).json({ getUsers });
+    } catch (error) {
+      res.status(404);
+      throw new Error(error);
+    }
   } else {
     res.status(404);
     new Error("error not foound code 404");
@@ -103,6 +108,7 @@ const getAll = asyncHandler(async (req, res) => {
 const del = asyncHandler(async (req, res) => {
   const { name, email } = req.body;
   const findUser = await User.findOne({ name, email });
+  ///////////////////////////////////////////////////////////////do not forget to add a uath confirmation
   console.log(findUser);
   if (findUser) {
     const delUser = await findUser.deleteOne();
@@ -117,7 +123,7 @@ const del = asyncHandler(async (req, res) => {
   }
 });
 // @desc    Update user profile
-// @route   PUT /api/users/profile
+// @route   PUT /api/users/profile ?????????????????/
 // @access  Private
 const updateUserProfile = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
@@ -142,6 +148,28 @@ const updateUserProfile = asyncHandler(async (req, res) => {
     throw new Error("User not found");
   }
 });
+// TEST- check if logged/////////////
+const checkIflogged = asyncHandler(async (req, res) => {
+  let token;
+  // works only with cookis-parser
+  token = req.cookies.jwt;
+
+  if (token) {
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      // should access logged user acount, find by id minus password ???
+      if (decoded) {
+        res.status(201).json({ msg: "cooki-OK" });
+      }
+    } catch (error) {
+      res.status(401);
+      throw new Error(error);
+    }
+  } else {
+    res.status(401);
+    throw new Error("401-unauthorized, token invalid");
+  }
+});
 module.exports = {
   auth,
   registerUser,
@@ -150,5 +178,6 @@ module.exports = {
   update,
   del,
   getAll,
-  updateUserProfile
+  updateUserProfile,
+  checkIflogged
 };
