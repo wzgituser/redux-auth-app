@@ -4,10 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "startS": "node backend/server.js",
+    "start": "node backend/server.js",
     "server": "nodemon backend/server.js",
-    "frontend": "react-scripts start  frontend",
-    "dev": "concurrently \"npm run frontend\" \"npm run server\""
+    "client": "npm start --prefix frontend/auth",
+    "dev": "concurrently \"npm run server\" \"npm run client\""
   },
   "keywords": [],
   "author": "",
